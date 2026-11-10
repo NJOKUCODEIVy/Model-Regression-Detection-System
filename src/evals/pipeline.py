@@ -108,6 +108,11 @@ def main(argv: list[str] | None = None) -> int:
 
     version = PromptConfig.from_yaml(args.candidate).version
 
+    # A missing key is a setup problem, not a regression, so stop before making 60 failing calls
+    if not args.skip_eval and not os.getenv("GROQ_API_KEY"):
+        sys.exit("GROQ_API_KEY is not set. Add it to your .env file, pass it with "
+                 "docker run -e GROQ_API_KEY=..., or add it as a GitHub Actions secret.")
+
     # 1. Evaluate the candidate
     if args.skip_eval:
         candidate_path = latest_results(version)

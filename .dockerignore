@@ -1,0 +1,13 @@
+# Keep secrets, local environments and generated files out of the image
+.env
+.env.*
+.venv/
+.venv-*/
+.git/
+.github/
+.vscode/
+reports/
+**/__pycache__/
+*.db
+check_llm.py
+check.llm.py
