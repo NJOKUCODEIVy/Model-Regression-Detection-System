@@ -1,0 +1,614 @@
+{
+  "dataset_version": "1.0",
+  "created_at": "2026-11-10",
+  "description": "Golden dataset for the customer support email classifier. Each case has a human-verified category and ideal one-sentence summary.",
+  "changelog": [
+    {
+      "version": "1.0",
+      "date": "2026-11-10",
+      "change": "Initial 60 cases: 15 per category, including all 22 hard edge cases. IDs are stable, so gaps in numbering are expected."
+    }
+  ],
+  "cases": [
+    {
+      "id": "case-001",
+      "input": "Hi, I was charged twice for my Pro subscription this month. Can you refund one of the charges?",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer was double-charged for their Pro subscription and wants one charge refunded."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Classic duplicate charge; baseline billing case."
+    },
+    {
+      "id": "case-002",
+      "input": "Could you send me the invoice for last month? Our finance team needs it with our company VAT number on it.",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer needs last month's invoice with their company VAT number for their finance team."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Invoice request."
+    },
+    {
+      "id": "case-003",
+      "input": "I cancelled my free trial two days before it ended but I still got charged $19.99. Please reverse this.",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer was charged after cancelling their free trial and wants the charge reversed."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Mentions cancelling, which can pull toward account, but the problem is the charge."
+    },
+    {
+      "id": "case-004",
+      "input": "What's the price difference between the monthly and annual plans? Is there a discount for paying yearly?",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer asks how monthly and annual pricing compare and whether yearly billing is discounted."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Pricing question."
+    },
+    {
+      "id": "case-005",
+      "input": "My card expires next week. How do I update my payment method so my plan doesn't lapse?",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer wants to update their payment card before it expires so their plan continues."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Payment details live in settings, so this can look like an account question."
+    },
+    {
+      "id": "case-008",
+      "input": "I upgraded to the Business plan in the middle of the month. Why is my bill so much higher than the plan price?",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer is confused about why their bill is higher than the plan price after a mid-month upgrade."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Proration confusion; the model must recognize an unexpected amount as billing."
+    },
+    {
+      "id": "case-009",
+      "input": "Please cancel my renewal. I don't want to be charged again next month, but I'd like to keep using it until the current period ends.",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer wants to cancel their renewal to avoid future charges while keeping access until the period ends."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Subscription cancellation is about charges, but it could be read as an account request."
+    },
+    {
+      "id": "case-011",
+      "input": "The dashboard won't load. It just shows a spinning wheel forever. I've tried both Chrome and Safari.",
+      "expected": {
+        "category": "technical",
+        "summary": "The dashboard is stuck loading in both Chrome and Safari."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Clear loading bug; baseline technical case."
+    },
+    {
+      "id": "case-012",
+      "input": "Every time I click 'Export to PDF' the app crashes and closes. I'm on version 4.2 on Windows 11.",
+      "expected": {
+        "category": "technical",
+        "summary": "The app crashes when the customer exports to PDF on version 4.2 on Windows 11."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Crash with version details."
+    },
+    {
+      "id": "case-013",
+      "input": "I'm getting 'Error 502 Bad Gateway' when I try to open any project. Is something down on your end?",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer gets a 502 error when opening projects and asks whether there's an outage."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Error code plus outage question."
+    },
+    {
+      "id": "case-014",
+      "input": "How do I connect the app to Google Calendar? I can't find the integration anywhere in the settings.",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer can't find how to connect the app to Google Calendar."
+      },
+      "expected_difficulty": "medium",
+      "notes": "How-to question; mentioning settings can pull toward account."
+    },
+    {
+      "id": "case-015",
+      "input": "Push notifications stopped working on my Android phone after yesterday's update.",
+      "expected": {
+        "category": "technical",
+        "summary": "Push notifications stopped working on the customer's Android phone after the latest update."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Regression after an update."
+    },
+    {
+      "id": "case-017",
+      "input": "Your API keeps returning 429 errors even though we're way under the rate limit for our plan.",
+      "expected": {
+        "category": "technical",
+        "summary": "The API returns 429 rate-limit errors even though the customer is under their plan's limit."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Mentions the plan, which can pull toward billing, but the problem is API behavior."
+    },
+    {
+      "id": "case-020",
+      "input": "Is there a way to work offline? I travel a lot and lose connection on flights.",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer asks whether the app can be used offline while traveling."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Feature question that could be mistaken for general."
+    },
+    {
+      "id": "case-021",
+      "input": "I can't log in. It says my account is locked after too many failed attempts.",
+      "expected": {
+        "category": "account",
+        "summary": "Customer's account is locked after too many failed login attempts."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Locked account; baseline account case."
+    },
+    {
+      "id": "case-022",
+      "input": "How do I change the email address on my account? I'm leaving my job and will lose access to my work inbox.",
+      "expected": {
+        "category": "account",
+        "summary": "Customer wants to change their account email because they'll lose access to their work inbox."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Profile change."
+    },
+    {
+      "id": "case-023",
+      "input": "I never got the password reset email. I've checked my spam folder and waited over an hour.",
+      "expected": {
+        "category": "account",
+        "summary": "Customer hasn't received a password reset email despite checking spam and waiting an hour."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Email delivery problem could look technical, but it's about getting into the account."
+    },
+    {
+      "id": "case-024",
+      "input": "Please delete my account and all of my personal data.",
+      "expected": {
+        "category": "account",
+        "summary": "Customer wants their account and all personal data deleted."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Account deletion request."
+    },
+    {
+      "id": "case-025",
+      "input": "I'd like to add two new teammates to our workspace and give one of them admin rights.",
+      "expected": {
+        "category": "account",
+        "summary": "Customer wants to add two teammates to their workspace and make one an admin."
+      },
+      "expected_difficulty": "easy",
+      "notes": "User management."
+    },
+    {
+      "id": "case-026",
+      "input": "Can I change my username? I made a typo when I signed up.",
+      "expected": {
+        "category": "account",
+        "summary": "Customer wants to change their username to fix a typo from sign-up."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Profile change."
+    },
+    {
+      "id": "case-027",
+      "input": "I got a login alert from a device in another country. I didn't sign in from there. What should I do?",
+      "expected": {
+        "category": "account",
+        "summary": "Customer received a login alert from an unfamiliar foreign device and wants to know what to do."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Security concern with an urgent tone."
+    },
+    {
+      "id": "case-028",
+      "input": "I'm not receiving my two-factor codes by SMS anymore, so I'm stuck at the login screen.",
+      "expected": {
+        "category": "account",
+        "summary": "Customer can't log in because they're no longer receiving two-factor codes by SMS."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Code delivery could be read as technical, but the impact is account access."
+    },
+    {
+      "id": "case-029",
+      "input": "How do I turn off the marketing emails? I only want important account notifications.",
+      "expected": {
+        "category": "account",
+        "summary": "Customer wants to stop marketing emails while keeping important account notifications."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Notification preferences could be read as general."
+    },
+    {
+      "id": "case-031",
+      "input": "Do you have any openings for remote designers? I'd love to work with your team.",
+      "expected": {
+        "category": "general",
+        "summary": "Customer asks about remote designer job openings."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Job inquiry; baseline general case."
+    },
+    {
+      "id": "case-032",
+      "input": "Just wanted to say your support team was fantastic last week. Thanks, Maria!",
+      "expected": {
+        "category": "general",
+        "summary": "Customer is thanking the support team for great help last week."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Positive feedback with no request."
+    },
+    {
+      "id": "case-033",
+      "input": "Are you planning to release a Linux version of the desktop app?",
+      "expected": {
+        "category": "general",
+        "summary": "Customer asks whether a Linux version of the desktop app is planned."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Roadmap question; mentioning a platform can pull toward technical."
+    },
+    {
+      "id": "case-034",
+      "input": "What are your support hours over the holidays?",
+      "expected": {
+        "category": "general",
+        "summary": "Customer asks about support hours during the holidays."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Support availability question."
+    },
+    {
+      "id": "case-035",
+      "input": "I'm writing a blog post comparing productivity tools. Could someone from your team answer a few questions?",
+      "expected": {
+        "category": "general",
+        "summary": "Customer is writing a blog post and wants to interview someone from the team."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Press or media request."
+    },
+    {
+      "id": "case-036",
+      "input": "Can I visit your office? I'll be in Berlin next month and would love to say hello.",
+      "expected": {
+        "category": "general",
+        "summary": "Customer asks whether they can visit the office while in Berlin next month."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Office visit request."
+    },
+    {
+      "id": "case-037",
+      "input": "Do you have a partner or affiliate program? I run a consulting business and recommend tools to my clients.",
+      "expected": {
+        "category": "general",
+        "summary": "Customer asks about a partner or affiliate program for their consulting business."
+      },
+      "expected_difficulty": "easy",
+      "notes": "Partnership inquiry."
+    },
+    {
+      "id": "case-039",
+      "input": "refund??",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer is asking for a refund without giving details."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Extremely short; one word of signal."
+    },
+    {
+      "id": "case-040",
+      "input": "cant login",
+      "expected": {
+        "category": "account",
+        "summary": "Customer can't log in."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Extremely short with a typo."
+    },
+    {
+      "id": "case-041",
+      "input": "app broken",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer reports the app is broken without details."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Extremely short and vague."
+    },
+    {
+      "id": "case-042",
+      "input": "helo, i tryed to pay my invoce 3 times and the card keeps geting declind, wat is wrong??",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer's card keeps getting declined when they try to pay an invoice."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Heavy typos; a failing payment could also look technical."
+    },
+    {
+      "id": "case-043",
+      "input": "my pasword reset link sayz expired evry time i click it rite away",
+      "expected": {
+        "category": "account",
+        "summary": "Customer's password reset link shows as expired even when clicked immediately."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Typos; arguably a bug (technical), labeled account because the outcome is being locked out."
+    },
+    {
+      "id": "case-044",
+      "input": "Hola, I was charged dos veces este mes for my subscription. ¿Me pueden devolver uno?",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer was charged twice this month and asks for one charge to be refunded."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Spanish and English mixed."
+    },
+    {
+      "id": "case-045",
+      "input": "Bonjour, l'application plante every time I open the camera feature. Merci de m'aider.",
+      "expected": {
+        "category": "technical",
+        "summary": "The app crashes whenever the customer opens the camera feature."
+      },
+      "expected_difficulty": "hard",
+      "notes": "French and English mixed."
+    },
+    {
+      "id": "case-046",
+      "input": "Wow, love paying for a \"premium\" plan that's been down three times this week. Really getting my money's worth.",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer sarcastically complains that the service has been down three times this week despite paying for premium."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Sarcasm; mentions paying, but the core issue is outages."
+    },
+    {
+      "id": "case-047",
+      "input": "Great, another password reset email that never arrives. Fifth time's the charm, right?",
+      "expected": {
+        "category": "account",
+        "summary": "Customer sarcastically reports that password reset emails keep failing to arrive."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Sarcasm plus repeated failed attempts."
+    },
+    {
+      "id": "case-048",
+      "input": "I was charged for the Pro plan but my account still shows the Free plan and I can't use any Pro features.",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer paid for the Pro plan but their account still shows Free and Pro features don't work."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Could be billing, account, or technical; labeled billing because the customer paid for something they didn't receive."
+    },
+    {
+      "id": "case-049",
+      "input": "I want to close my account. Also, will I get a refund for the rest of the year since I paid annually?",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer wants to close their account and asks about a refund for the unused part of their annual plan."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Two intents (account closure and refund); labeled billing because the refund needs a decision."
+    },
+    {
+      "id": "case-050",
+      "input": "Is my data safe with you? I read about a breach at another company and got worried.",
+      "expected": {
+        "category": "general",
+        "summary": "Customer is worried about data security after reading about another company's breach."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Security worry with no specific account problem; could be read as account."
+    },
+    {
+      "id": "case-061",
+      "input": "The mobile app logs me out every time I close it, so I have to sign in again each time.",
+      "expected": {
+        "category": "technical",
+        "summary": "The mobile app logs the customer out every time they close it."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Mentions signing in, but it's a session bug, not an access problem."
+    },
+    {
+      "id": "case-063",
+      "input": "The dark mode setting doesn't stick. It switches back to light mode every time I restart the app.",
+      "expected": {
+        "category": "technical",
+        "summary": "The dark mode setting resets to light mode whenever the app restarts."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Mentions a setting, which can pull toward account."
+    },
+    {
+      "id": "case-072",
+      "input": "Our SSO login through Okta started failing this morning with an 'invalid SAML response' error.",
+      "expected": {
+        "category": "technical",
+        "summary": "SSO login through Okta has been failing since this morning with an invalid SAML response error."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Login failure caused by an integration error; labeled technical because the error points to the SSO setup, not the user's credentials."
+    },
+    {
+      "id": "case-076",
+      "input": "Can I have two separate workspaces under one login, one for work and one for personal stuff?",
+      "expected": {
+        "category": "account",
+        "summary": "Customer asks whether one login can hold separate work and personal workspaces."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Account structure question."
+    },
+    {
+      "id": "case-078",
+      "input": "I signed up with Google, but now I want to log in with a regular email and password instead.",
+      "expected": {
+        "category": "account",
+        "summary": "Customer signed up with Google and wants to switch to email and password login."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Login method change."
+    },
+    {
+      "id": "case-085",
+      "input": "Do you have a status page where I can check for outages?",
+      "expected": {
+        "category": "general",
+        "summary": "Customer asks whether there's a status page for checking outages."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Mentions outages, but asks for a resource rather than reporting a problem."
+    },
+    {
+      "id": "case-086",
+      "input": "Who should I contact about a security vulnerability I found on your website?",
+      "expected": {
+        "category": "general",
+        "summary": "Customer wants to know who to contact about a security vulnerability they found."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Security topic that could be read as technical."
+    },
+    {
+      "id": "case-088",
+      "input": "Could we book a demo for my team of 40 people sometime next week?",
+      "expected": {
+        "category": "general",
+        "summary": "Customer wants to book a demo for their 40-person team next week."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Sales request that could be read as billing."
+    },
+    {
+      "id": "case-090",
+      "input": "Feature suggestion: a calendar view for tasks would be amazing.",
+      "expected": {
+        "category": "general",
+        "summary": "Customer suggests adding a calendar view for tasks."
+      },
+      "expected_difficulty": "medium",
+      "notes": "Feature request that could be read as technical."
+    },
+    {
+      "id": "case-092",
+      "input": "thx!",
+      "expected": {
+        "category": "general",
+        "summary": "Customer is saying thanks."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Extremely short with no request."
+    },
+    {
+      "id": "case-093",
+      "input": "invoice pls",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer is asking for an invoice."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Extremely short."
+    },
+    {
+      "id": "case-094",
+      "input": "wen i clik save it sais erorr and nothin hapens",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer gets an error and nothing happens when they click save."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Heavy typos."
+    },
+    {
+      "id": "case-095",
+      "input": "Hallo, ich kann mich nicht einloggen since I changed my phone. Bitte helfen!",
+      "expected": {
+        "category": "account",
+        "summary": "Customer can't log in since changing their phone and is asking for help."
+      },
+      "expected_difficulty": "hard",
+      "notes": "German and English mixed; likely two-factor tied to the old phone."
+    },
+    {
+      "id": "case-096",
+      "input": "Bonjour ! Est-ce que vous avez des offres d'emploi in London?",
+      "expected": {
+        "category": "general",
+        "summary": "Customer asks whether there are job openings in London."
+      },
+      "expected_difficulty": "hard",
+      "notes": "French and English mixed."
+    },
+    {
+      "id": "case-097",
+      "input": "Oh fantastic, charged again after I cancelled. Third time now. You guys are amazing at taking money.",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer sarcastically complains about being charged after cancelling, for the third time."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Sarcasm plus a repeated billing failure."
+    },
+    {
+      "id": "case-098",
+      "input": "Thanks for the 'quick' reply. It only took two weeks.",
+      "expected": {
+        "category": "general",
+        "summary": "Customer sarcastically complains that support took two weeks to reply."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Sarcastic complaint about support speed, with no product issue; easily misread as thanks."
+    },
+    {
+      "id": "case-099",
+      "input": "After the update I can't see any of my old projects. Did my account get reset?",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer's old projects disappeared after an update and they suspect their account was reset."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Customer suspects an account problem, but missing data after an update points to a bug."
+    },
+    {
+      "id": "case-100",
+      "input": "We're thinking about switching from your competitor. Can you match their price and help us move our data over?",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer is considering switching from a competitor and asks for a price match and help migrating data."
+      },
+      "expected_difficulty": "hard",
+      "notes": "Mixes a pricing request with a migration question; labeled billing because the price is the deciding question."
+    }
+  ]
+}
