@@ -1,0 +1,63 @@
+# Builds the Docker image and smoke-tests it, without calling the LLM.
+# It runs on changes to the code, data or container setup, and can also be started by hand.
+name: Docker build
+
+on:
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "requirements.txt"
+      - "src/**"
+      - "prompts/**"
+      - "data/**"
+      - ".github/workflows/docker.yml"
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "requirements.txt"
+      - "src/**"
+      - "prompts/**"
+      - "data/**"
+      - ".github/workflows/docker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build the image
+        run: docker build -t regression-check .
+
+      - name: Check that no secrets are inside the image
+        run: |
+          docker run --rm --entrypoint sh regression-check -c 'test ! -e .env' \
+            && echo "No .env file in the image."
+
+      - name: Smoke test with saved results (no API calls)
+        run: |
+          mkdir -p reports && chmod 777 reports
+          # Settings are passed as environment variables, the way a real deployment would
+          docker run --rm \
+            -e BASELINE_PROMPT=v3 \
+            -e MAX_REGRESSIONS=1 \
+            -v "$PWD/reports:/app/reports" \
+            regression-check --candidate prompts/v4.yaml --skip-eval --no-slack --summary-file reports/summary.md
+          test -f reports/latest.html && echo "The HTML report was created."
+          cat reports/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the smoke-test report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: docker-smoke-test-report
+          path: reports/
+          if-no-files-found: ignore
