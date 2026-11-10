@@ -1,0 +1,124 @@
+# Runs the prompt regression check on pull requests and blocks the merge when it FAILS.
+#
+# It starts on every pull request, but only evaluates prompts when files in prompts/ changed.
+# Pull requests without prompt changes pass in a few seconds. This matters because a required
+# check that never starts would leave those pull requests waiting forever.
+name: Prompt regression check
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "Prompt file to test, e.g. prompts/v4.yaml"
+        required: true
+        default: "prompts/v4.yaml"
+
+permissions:
+  contents: read
+  pull-requests: write # to post the summary comment
+
+concurrency: # a new push to the same pull request cancels the older run
+  group: regression-check-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  regression-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      # Settings: change them under Settings → Secrets and variables → Actions → Variables
+      BASELINE_PROMPT: ${{ vars.BASELINE_PROMPT || 'v4' }}
+      MAX_REGRESSIONS: ${{ vars.MAX_REGRESSIONS || '0' }}
+      DRIFT_THRESHOLD: ${{ vars.DRIFT_THRESHOLD || '95' }}
+      REPORT_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # full history, so we can see which files the pull request changed
+
+      - name: Find changed prompt files
+        id: prompts
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          MANUAL_PROMPT: ${{ inputs.prompt }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            files="$MANUAL_PROMPT"
+          else
+            files=$(git diff --name-only --diff-filter=AM "origin/$BASE_REF...HEAD" -- 'prompts/*.yaml' | tr '\n' ' ')
+          fi
+          files=$(echo "$files" | xargs) # trim spaces
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+          if [ -z "$files" ]; then
+            echo "No prompt files changed, so there is nothing to evaluate." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Prompt files to evaluate: $files"
+          fi
+
+      - uses: actions/setup-python@v6
+        if: steps.prompts.outputs.files != ''
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        if: steps.prompts.outputs.files != ''
+        run: pip install -r requirements.txt
+
+      - name: Run the regression check
+        if: steps.prompts.outputs.files != ''
+        env:
+          PROMPT_FILES: ${{ steps.prompts.outputs.files }}
+        run: |
+          mkdir -p reports
+          status=0
+          for file in $PROMPT_FILES; do
+            name=$(basename "$file" .yaml)
+            echo "::group::Regression check for $file"
+            python -m src.evals.pipeline --candidate "$file" --summary-file "reports/summary_$name.md" || status=1
+            echo "::endgroup::"
+            if [ -f "reports/summary_$name.md" ]; then
+              cat "reports/summary_$name.md" >> reports/pr_comment.md
+              echo "" >> reports/pr_comment.md
+            else
+              echo "## 🚨 The regression check for \`$file\` crashed before finishing. See the workflow logs." >> reports/pr_comment.md
+            fi
+          done
+          exit $status
+
+      - name: Upload the HTML report
+        if: always() && steps.prompts.outputs.files != ''
+        uses: actions/upload-artifact@v6
+        with:
+          name: regression-report
+          path: |
+            reports/
+            results/
+          if-no-files-found: ignore
+
+      - name: Comment on the pull request
+        if: always() && github.event_name == 'pull_request' && steps.prompts.outputs.files != ''
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- prompt-regression-check -->';
+            const path = 'reports/pr_comment.md';
+            const text = fs.existsSync(path) ? fs.readFileSync(path, 'utf8')
+              : '## 🚨 The regression check did not produce a summary. See the workflow logs.';
+            const body = `${marker}\n${text}`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            // Update our earlier comment instead of adding a new one on every push
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
