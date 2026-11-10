@@ -1,0 +1,65 @@
+{
+  "compared_at": "2026-11-10T20:59:01",
+  "baseline": {
+    "prompt_version": "v3",
+    "run_at": "2026-11-10T20:24:25",
+    "dataset_version": "1.0"
+  },
+  "candidate": {
+    "prompt_version": "v4",
+    "run_at": "2026-11-10T20:39:58",
+    "dataset_version": "1.0"
+  },
+  "same_dataset": true,
+  "shared_cases": 60,
+  "only_in_baseline": [],
+  "only_in_candidate": [],
+  "baseline_passed": 59,
+  "candidate_passed": 59,
+  "accuracy_change_pts": 0.0,
+  "regressions": [
+    {
+      "id": "case-049",
+      "difficulty": "hard",
+      "expected": "billing",
+      "was": "billing",
+      "now": "account",
+      "error": null
+    }
+  ],
+  "fixes": [
+    {
+      "id": "case-076",
+      "difficulty": "medium",
+      "expected": "account",
+      "was": "technical",
+      "now": "account",
+      "error": null
+    }
+  ],
+  "still_failing": [],
+  "by_category": {
+    "billing": {
+      "total": 15,
+      "baseline": 15,
+      "candidate": 14
+    },
+    "technical": {
+      "total": 15,
+      "baseline": 15,
+      "candidate": 15
+    },
+    "account": {
+      "total": 15,
+      "baseline": 14,
+      "candidate": 15
+    },
+    "general": {
+      "total": 15,
+      "baseline": 15,
+      "candidate": 15
+    }
+  },
+  "max_regressions_allowed": 0,
+  "verdict": "REGRESSION"
+}

@@ -1,0 +1,643 @@
+{
+  "prompt_version": "v1",
+  "model": "openai/gpt-oss-120b",
+  "dataset_version": "1.0",
+  "run_at": "2026-11-10T20:04:43",
+  "accuracy": 0.9333,
+  "passed": 56,
+  "total": 60,
+  "by_category": {
+    "billing": {
+      "passed": 15,
+      "total": 15
+    },
+    "technical": {
+      "passed": 13,
+      "total": 15
+    },
+    "account": {
+      "passed": 15,
+      "total": 15
+    },
+    "general": {
+      "passed": 13,
+      "total": 15
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "passed": 18,
+      "total": 18
+    },
+    "medium": {
+      "passed": 17,
+      "total": 20
+    },
+    "hard": {
+      "passed": 21,
+      "total": 22
+    }
+  },
+  "cases": [
+    {
+      "id": "case-001",
+      "difficulty": "easy",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer was double-charged for their Pro subscription and wants one charge refunded.",
+      "summary": "Customer was charged twice for their Pro subscription and requests a refund for one charge.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-002",
+      "difficulty": "easy",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer needs last month's invoice with their company VAT number for their finance team.",
+      "summary": "Customer requests last month's invoice with company VAT number.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-003",
+      "difficulty": "medium",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer was charged after cancelling their free trial and wants the charge reversed.",
+      "summary": "Customer was charged after canceling a free trial and requests a reversal.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-004",
+      "difficulty": "easy",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer asks how monthly and annual pricing compare and whether yearly billing is discounted.",
+      "summary": "Customer asks about price difference and discount between monthly and annual plans.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-005",
+      "difficulty": "medium",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer wants to update their payment card before it expires so their plan continues.",
+      "summary": "Customer needs to update their payment method because their card is expiring soon.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-008",
+      "difficulty": "medium",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer is confused about why their bill is higher than the plan price after a mid-month upgrade.",
+      "summary": "Customer upgraded to Business plan mid-month and sees a higher bill than expected.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-009",
+      "difficulty": "medium",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer wants to cancel their renewal to avoid future charges while keeping access until the period ends.",
+      "summary": "Customer wants to cancel the renewal to avoid future charges while keeping current access.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-011",
+      "difficulty": "easy",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "The dashboard is stuck loading in both Chrome and Safari.",
+      "summary": "Dashboard fails to load, showing an endless spinning wheel on multiple browsers.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-012",
+      "difficulty": "easy",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "The app crashes when the customer exports to PDF on version 4.2 on Windows 11.",
+      "summary": "App crashes when clicking 'Export to PDF' on version 4.2 Windows 11.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-013",
+      "difficulty": "easy",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "Customer gets a 502 error when opening projects and asks whether there's an outage.",
+      "summary": "User encounters a 502 Bad Gateway error when opening projects and suspects a service outage.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-014",
+      "difficulty": "medium",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "Customer can't find how to connect the app to Google Calendar.",
+      "summary": "Customer wants instructions on connecting the app to Google Calendar and can't locate the integration settings.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-015",
+      "difficulty": "easy",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "Push notifications stopped working on the customer's Android phone after the latest update.",
+      "summary": "Push notifications stopped working on Android after the recent update.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-017",
+      "difficulty": "medium",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "The API returns 429 rate-limit errors even though the customer is under their plan's limit.",
+      "summary": "API is returning 429 errors even though usage is below the plan's rate limit.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-020",
+      "difficulty": "medium",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "Customer asks whether the app can be used offline while traveling.",
+      "summary": "Customer asks if the app can be used offline while traveling without a connection.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-021",
+      "difficulty": "easy",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer's account is locked after too many failed login attempts.",
+      "summary": "User cannot log in because the account is locked after multiple failed attempts.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-022",
+      "difficulty": "easy",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer wants to change their account email because they'll lose access to their work inbox.",
+      "summary": "Customer wants to change the email address associated with their account.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-023",
+      "difficulty": "medium",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer hasn't received a password reset email despite checking spam and waiting an hour.",
+      "summary": "Password reset email not received despite checking spam and waiting.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-024",
+      "difficulty": "easy",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer wants their account and all personal data deleted.",
+      "summary": "Customer requests deletion of their account and personal data.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-025",
+      "difficulty": "easy",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer wants to add two teammates to their workspace and make one an admin.",
+      "summary": "Customer wants to add two teammates to the workspace and grant admin rights to one.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-026",
+      "difficulty": "easy",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer wants to change their username to fix a typo from sign-up.",
+      "summary": "Customer wants to change their username because of a typo made during sign\u2011up.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-027",
+      "difficulty": "medium",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer received a login alert from an unfamiliar foreign device and wants to know what to do.",
+      "summary": "User received an unexpected login alert from a foreign device and seeks guidance.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-028",
+      "difficulty": "medium",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer can't log in because they're no longer receiving two-factor codes by SMS.",
+      "summary": "User is not receiving two-factor authentication codes via SMS, preventing login.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-029",
+      "difficulty": "medium",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer wants to stop marketing emails while keeping important account notifications.",
+      "summary": "Customer wants to turn off marketing emails and keep only important account notifications.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-031",
+      "difficulty": "easy",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer asks about remote designer job openings.",
+      "summary": "Inquiry about remote designer job openings.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-032",
+      "difficulty": "easy",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer is thanking the support team for great help last week.",
+      "summary": "Customer praises the support team for their excellent service.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-033",
+      "difficulty": "medium",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer asks whether a Linux version of the desktop app is planned.",
+      "summary": "Customer inquires about the possibility of a Linux version of the desktop app.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-034",
+      "difficulty": "easy",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer asks about support hours during the holidays.",
+      "summary": "Customer asks about support hours during the holidays.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-035",
+      "difficulty": "easy",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer is writing a blog post and wants to interview someone from the team.",
+      "summary": "User requests assistance for a blog post comparing productivity tools.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-036",
+      "difficulty": "easy",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer asks whether they can visit the office while in Berlin next month.",
+      "summary": "Customer wants to know if they can visit the company's office in Berlin.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-037",
+      "difficulty": "easy",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer asks about a partner or affiliate program for their consulting business.",
+      "summary": "Customer inquires about a partner or affiliate program for their consulting business.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-039",
+      "difficulty": "hard",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer is asking for a refund without giving details.",
+      "summary": "Customer is asking about a refund.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-040",
+      "difficulty": "hard",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer can't log in.",
+      "summary": "Customer is unable to log in.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-041",
+      "difficulty": "hard",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "Customer reports the app is broken without details.",
+      "summary": "The customer reports that the app is broken.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-042",
+      "difficulty": "hard",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer's card keeps getting declined when they try to pay an invoice.",
+      "summary": "Customer attempted to pay an invoice multiple times but the card is being declined.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-043",
+      "difficulty": "hard",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer's password reset link shows as expired even when clicked immediately.",
+      "summary": "Password reset link says it expired each time the customer clicks it.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-044",
+      "difficulty": "hard",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer was charged twice this month and asks for one charge to be refunded.",
+      "summary": "Customer was charged twice for their subscription this month and requests a refund.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-045",
+      "difficulty": "hard",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "The app crashes whenever the customer opens the camera feature.",
+      "summary": "The app crashes every time the user opens the camera feature.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-046",
+      "difficulty": "hard",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "Customer sarcastically complains that the service has been down three times this week despite paying for premium.",
+      "summary": "Customer complains that the premium service has been down multiple times, questioning its value.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-047",
+      "difficulty": "hard",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer sarcastically reports that password reset emails keep failing to arrive.",
+      "summary": "Customer repeatedly does not receive password reset emails.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-048",
+      "difficulty": "hard",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer paid for the Pro plan but their account still shows Free and Pro features don't work.",
+      "summary": "Customer was charged for the Pro plan but their account still shows Free and lacks Pro features.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-049",
+      "difficulty": "hard",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer wants to close their account and asks about a refund for the unused part of their annual plan.",
+      "summary": "Customer wants to close their account and asks if they will receive a refund for the remaining portion of their annual subscription.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-050",
+      "difficulty": "hard",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer is worried about data security after reading about another company's breach.",
+      "summary": "Customer is concerned about data safety and security after hearing about a breach.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-061",
+      "difficulty": "medium",
+      "expected": "technical",
+      "predicted": "account",
+      "expected_summary": "The mobile app logs the customer out every time they close it.",
+      "summary": "User is logged out of the mobile app upon closing it and must sign in again each time.",
+      "passed": false,
+      "error": null
+    },
+    {
+      "id": "case-063",
+      "difficulty": "medium",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "The dark mode setting resets to light mode whenever the app restarts.",
+      "summary": "Dark mode setting reverts to light mode after app restart, indicating a persistence bug.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-072",
+      "difficulty": "hard",
+      "expected": "technical",
+      "predicted": "account",
+      "expected_summary": "SSO login through Okta has been failing since this morning with an invalid SAML response error.",
+      "summary": "SSO login via Okta is failing with an 'invalid SAML response' error.",
+      "passed": false,
+      "error": null
+    },
+    {
+      "id": "case-076",
+      "difficulty": "medium",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer asks whether one login can hold separate work and personal workspaces.",
+      "summary": "User wants to know if they can have two separate workspaces under a single login for work and personal use.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-078",
+      "difficulty": "medium",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer signed up with Google and wants to switch to email and password login.",
+      "summary": "User wants to switch from Google sign\u2011in to a regular email and password login.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-085",
+      "difficulty": "medium",
+      "expected": "general",
+      "predicted": "technical",
+      "expected_summary": "Customer asks whether there's a status page for checking outages.",
+      "summary": "Customer asks if there is a status page to check for outages.",
+      "passed": false,
+      "error": null
+    },
+    {
+      "id": "case-086",
+      "difficulty": "medium",
+      "expected": "general",
+      "predicted": "technical",
+      "expected_summary": "Customer wants to know who to contact about a security vulnerability they found.",
+      "summary": "Customer wants to know who to contact regarding a security vulnerability on the website.",
+      "passed": false,
+      "error": null
+    },
+    {
+      "id": "case-088",
+      "difficulty": "medium",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer wants to book a demo for their 40-person team next week.",
+      "summary": "Customer wants to schedule a demo for a team of 40 people next week.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-090",
+      "difficulty": "medium",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer suggests adding a calendar view for tasks.",
+      "summary": "Customer suggests adding a calendar view for tasks as a new feature.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-092",
+      "difficulty": "hard",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer is saying thanks.",
+      "summary": "Customer thanked the support team.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-093",
+      "difficulty": "hard",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer is asking for an invoice.",
+      "summary": "Customer requests an invoice.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-094",
+      "difficulty": "hard",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "Customer gets an error and nothing happens when they click save.",
+      "summary": "User encounters an error and no action occurs when clicking the save button.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-095",
+      "difficulty": "hard",
+      "expected": "account",
+      "predicted": "account",
+      "expected_summary": "Customer can't log in since changing their phone and is asking for help.",
+      "summary": "User cannot log in after changing their phone and needs assistance.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-096",
+      "difficulty": "hard",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer asks whether there are job openings in London.",
+      "summary": "Customer asks if there are job offers in London.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-097",
+      "difficulty": "hard",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer sarcastically complains about being charged after cancelling, for the third time.",
+      "summary": "Customer was charged again after canceling their subscription multiple times and is upset.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-098",
+      "difficulty": "hard",
+      "expected": "general",
+      "predicted": "general",
+      "expected_summary": "Customer sarcastically complains that support took two weeks to reply.",
+      "summary": "Customer complains about the slow response time, noting it took two weeks.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-099",
+      "difficulty": "hard",
+      "expected": "technical",
+      "predicted": "technical",
+      "expected_summary": "Customer's old projects disappeared after an update and they suspect their account was reset.",
+      "summary": "User cannot see old projects after an update and suspects their account may have been reset.",
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "case-100",
+      "difficulty": "hard",
+      "expected": "billing",
+      "predicted": "billing",
+      "expected_summary": "Customer is considering switching from a competitor and asks for a price match and help migrating data.",
+      "summary": "Customer requests a price match with a competitor and assistance with data migration.",
+      "passed": true,
+      "error": null
+    }
+  ]
+}

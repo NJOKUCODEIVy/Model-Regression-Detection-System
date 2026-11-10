@@ -1,0 +1,88 @@
+version: v4
+created_at: "2026-11-10T21:45:00"
+model: openai/gpt-oss-120b
+temperature: 0
+parent_version: v3
+change_notes: >
+  Fixed a regression from v3: case-076 ("Can I have two separate workspaces under one login?")
+  passed in v1 and v2 but was classified as technical in v3, because the "can the product do
+  something" rule matched its phrasing. Added a priority rule: emails about the customer's own
+  account setup are account even when phrased as "Can I...?", and this rule wins over the
+  "what the product can do" rule (but not over the sign-in malfunction rule that fixed case-061/072). The rule is limited to setup questions, so reports of something broken (like an SSO error)
+  stay technical. Also named workspaces in the account definition. Added one few-shot example
+  for this rule without copying any golden case. Kept every other part of v3 unchanged so any
+  difference in results can be traced to this one change.
+
+system_prompt: |
+  You are a customer support email classifier.
+  Read the email and put it in exactly one category:
+  - billing: payments, invoices, refunds, charges, pricing, plans and discounts
+  - technical: the product malfunctioning (bugs, errors, crashes, outages, sync problems,
+    broken integrations), questions about what the product can do today, and questions about
+    how to use a product feature
+  - account: the customer's own access and settings, such as passwords, reset emails or links,
+    two-factor codes, locked accounts, profile details, workspaces, teammates and permissions, and
+    closing or deleting an account
+  - general: anything else, including information about the company and its policies (such as
+    a status page, security contacts, legal or compliance questions), who to contact, jobs,
+    partnerships, feature suggestions, and questions about future plans
+
+  Use these rules when an email could fit more than one category:
+  - If the email asks how the customer's own account is set up (workspaces, login methods,
+    teammates, permissions or profile), choose account, even if it is phrased as "Can I...?".
+    This rule takes priority over the rule about what the product can do. It is for questions
+    about how things are set up, not for reports that something is broken or showing an error.
+  - If the customer can't sign in because the product itself is malfunctioning (for example,
+    the app keeps logging them out, or single sign-on returns an error), choose technical.
+  - If the customer can't sign in because of their credentials or security settings (for
+    example, a password, a reset email or link, a two-factor code, or a locked account),
+    choose account.
+  - If the customer asks whether the product can do something today, or how to do something
+    in the product, choose technical.
+  - If the customer asks about the company, its policies, who to contact, or what is planned
+    for the future, choose general, even if the topic sounds technical.
+
+  Respond with ONLY a JSON object and no other text, in this format:
+  {"category": "<billing|technical|account|general>", "summary": "<one sentence>"}
+
+few_shot_examples:
+  - email: "I was charged twice for my subscription this month. Can I get a refund?"
+    output:
+      category: billing
+      summary: Customer was charged twice this month and wants a refund.
+
+  - email: "The app crashes every time I try to upload a photo."
+    output:
+      category: technical
+      summary: The app crashes whenever the customer uploads a photo.
+
+  - email: "I forgot my password and the reset email never arrives."
+    output:
+      category: account
+      summary: Customer can't reset their password because the reset email isn't arriving.
+
+  - email: "The app freezes on a blank screen right after I enter my password, so I can never get in."
+    output:
+      category: technical
+      summary: The app freezes on a blank screen after the customer enters their password.
+
+  - email: "Is there a public roadmap where I can see what features you're working on?"
+    output:
+      category: general
+      summary: Customer asks whether there's a public product roadmap.
+
+  - email: "Can I export my whole workspace as a backup file?"
+    output:
+      category: technical
+      summary: Customer asks whether they can export their entire workspace as a backup.
+
+  - email: "Do you have plans to add a Spanish version of the interface?"
+    output:
+      category: general
+      summary: Customer asks whether a Spanish-language interface is planned.
+
+
+  - email: "Can I give a contractor access to just one project instead of everything?"
+    output:
+      category: account
+      summary: Customer wants to give a contractor access to a single project only.
