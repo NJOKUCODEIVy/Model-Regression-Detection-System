@@ -6,7 +6,8 @@
 # Settings come from environment variables, so nothing secret is ever baked into the image:
 #   GROQ_API_KEY       (required for a real eval run)
 #   SLACK_WEBHOOK_URL  (optional; no Slack message if unset)
-#   BASELINE_PROMPT, MAX_REGRESSIONS, DRIFT_THRESHOLD, DRIFT_WINDOW  (defaults below)
+#   BASELINE_PROMPT, WARNING_DELTA, CRITICAL_DELTA, DRIFT_THRESHOLD, DRIFT_WINDOW, JUDGE_MODEL  (defaults below)
+#   MAX_REGRESSIONS    (optional hard limit; not set by default)
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -33,9 +34,11 @@ USER evaluser
 
 # Default settings; override any of them with -e NAME=value at run time
 ENV BASELINE_PROMPT=v4 \
-    MAX_REGRESSIONS=0 \
+    WARNING_DELTA=3 \
+    CRITICAL_DELTA=8 \
     DRIFT_THRESHOLD=95 \
-    DRIFT_WINDOW=7
+    DRIFT_WINDOW=7 \
+    JUDGE_MODEL=openai/gpt-oss-20b
 
 ENTRYPOINT ["python", "-m", "src.evals.pipeline"]
 CMD ["--candidate", "prompts/v4.yaml"]

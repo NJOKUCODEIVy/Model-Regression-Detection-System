@@ -19,7 +19,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from src.evals.compare import find_results, pct
+from src.evals.compare import add_threshold_args, find_results, fmt, pct, thresholds
 from src.evals.report import build_report, save_report
 
 load_dotenv()
@@ -55,19 +55,25 @@ def report_link(report_path: Path) -> str | None:
 def build_message(result: dict, status: str, report_path: Path, drift_warning: str | None = None) -> dict:
     b, c = result["baseline"], result["candidate"]
     title = headline(result)
-    if status == "WARN" and result["regressions"]:
-        title += f" (within the allowed limit of {result['max_regressions_allowed']})"
+    dims_b, dims_c = result["dimensions"]["baseline"], result["dimensions"]["candidate"]
+    reasons = "\n".join(f"• {r}" for r in result["reasons"])
 
     blocks = [
         {"type": "header", "text": {"type": "plain_text", "emoji": True,
-                                    "text": f"{STATUS_EMOJI[status]} {status}: model regression check"}},
+                                    "text": f"{STATUS_EMOJI[status]} {status}" + (f" ({result['severity']})" if result["severity"] != "ok" else "")
+                                            + ": model regression check"}},
         {"type": "section", "text": {"type": "mrkdwn", "text":
-            f"*{title}*\n`{b['prompt_version']}` → `{c['prompt_version']}` · dataset v{c['dataset_version']}"}},
+            f"*{title}*\n`{b['prompt_version']}` → `{c['prompt_version']}` · dataset v{c['dataset_version']}"
+            + (f"\n{reasons}" if reasons else "")}},
         {"type": "section", "fields": [
             {"type": "mrkdwn", "text": f"*Regressions*\n{len(result['regressions'])}"},
             {"type": "mrkdwn", "text": f"*Fixes*\n{len(result['fixes'])}"},
             {"type": "mrkdwn", "text": f"*Still failing*\n{len(result['still_failing'])}"},
             {"type": "mrkdwn", "text": f"*Cases compared*\n{result['shared_cases']}"},
+            {"type": "mrkdwn", "text": f"*Summary relevance*\n{fmt(dims_c['summary_relevance'], '/5', 2)} "
+                                       f"(was {fmt(dims_b['summary_relevance'], '/5', 2)})"},
+            {"type": "mrkdwn", "text": f"*Latency*\n{fmt(dims_c['latency_mean_ms'], ' ms')} mean, "
+                                       f"{fmt(dims_c['latency_p95_ms'], ' ms')} p95"},
         ]},
     ]
 
@@ -113,7 +119,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Post the regression check result to Slack.")
     parser.add_argument("--baseline", required=True, help="Prompt version (e.g. v3) or path to a results file")
     parser.add_argument("--candidate", required=True, help="Prompt version (e.g. v4) or path to a results file")
-    parser.add_argument("--max-regressions", type=int, default=0, help="Regressions to tolerate (default 0)")
+    add_threshold_args(parser)
     parser.add_argument("--dry-run", action="store_true", help="Print the Slack message instead of sending it")
     args = parser.parse_args()
 
@@ -123,7 +129,7 @@ if __name__ == "__main__":
 
     baseline = json.loads(find_results(args.baseline).read_text())
     candidate = json.loads(find_results(args.candidate).read_text())
-    page, result, status = build_report(baseline, candidate, args.max_regressions)
+    page, result, status = build_report(baseline, candidate, **thresholds(args))
     report_path = save_report(page, result)
     message = build_message(result, status, report_path)
 

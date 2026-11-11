@@ -4,12 +4,13 @@ Steps: evaluate the candidate prompt, compare it with the baseline, build the HT
 check for slow drift, and post the result to Slack. This is the command CI runs.
 
 Usage:
-    python -m src.evals.pipeline --candidate prompts/v4.yaml --baseline v3 --max-regressions 1
+    python -m src.evals.pipeline --candidate prompts/v4.yaml --baseline v3
     python -m src.evals.pipeline --candidate prompts/v4.yaml --baseline v3 --skip-eval   # reuse the latest results (no API calls)
     python -m src.evals.pipeline --candidate prompts/v4.yaml --baseline v4               # a fresh v4 run vs the previous v4 run
 
 Settings can also come from environment variables (handy for CI and Docker):
-    BASELINE_PROMPT, MAX_REGRESSIONS, DRIFT_THRESHOLD, DRIFT_WINDOW
+    BASELINE_PROMPT, WARNING_DELTA, CRITICAL_DELTA, MAX_REGRESSIONS (optional), DRIFT_THRESHOLD, DRIFT_WINDOW,
+    JUDGE (on/off), JUDGE_MODEL, EVAL_CONCURRENCY, REQUESTS_PER_MINUTE
 
 The exit code is 1 when the regression check FAILS, so CI can block the change.
 A drift warning is reported in Slack but doesn't fail the run, because it's about a trend.
@@ -25,7 +26,7 @@ from dotenv import load_dotenv
 
 from src.config import PromptConfig
 from src.evals.alerts import build_message, headline, send_to_slack
-from src.evals.compare import RESULTS_DIR, pct
+from src.evals.compare import RESULTS_DIR, add_threshold_args, dimension_rows, pct, thresholds
 from src.evals.drift import THRESHOLD, WINDOW, check_drift, load_runs
 from src.evals.report import build_report, save_report
 from src.evals.run_eval import print_report, run_eval
@@ -60,29 +61,38 @@ def build_summary(result: dict, status: str, drift: dict, report_url: str | None
     b, c = result["baseline"], result["candidate"]
     n, bp, cp = result["shared_cases"], result["baseline_passed"], result["candidate_passed"]
     title = headline(result)
-    if status == "WARN" and result["regressions"]:
-        title += f" (within the allowed limit of {result['max_regressions_allowed']})"
+    t = result["thresholds"]
+    limit = f" · hard limit {t['max_regressions']} regressions" if t["max_regressions"] is not None else ""
     lines = [
         f"## {STATUS_ICON[status]} {status}: prompt regression check for `{c['prompt_version']}`",
         f"**{title}**",
         "",
         f"Candidate `{c['prompt_version']}` vs baseline `{b['prompt_version']}` · {n} cases · dataset v{c['dataset_version']}",
         "",
-        "| | Baseline | Candidate |",
-        "|---|---|---|",
-        f"| Accuracy | {pct(bp, n)}% | {pct(cp, n)}% |",
-        f"| Regressions | | {len(result['regressions'])} |",
-        f"| Fixes | | {len(result['fixes'])} |",
-        f"| Still failing | | {len(result['still_failing'])} |",
+        f"**Severity: {result['severity']}** (warning above {t['warning_delta']:g} pts, critical above {t['critical_delta']:g} pts{limit})",
     ]
+    lines += [f"- {reason}" for reason in result["reasons"]]
+    lines += [
+        "",
+        "| | Baseline | Candidate | Change |",
+        "|---|---|---|---|",
+        f"| Pass rate | {pct(bp, n)}% | {pct(cp, n)}% | {result['accuracy_change_pts']:+.1f} pts |",
+        f"| Regressions | | {len(result['regressions'])} | |",
+        f"| Fixes | | {len(result['fixes'])} | |",
+        f"| Still failing | | {len(result['still_failing'])} | |",
+    ]
+    lines += [f"| {label} | {before} | {after} | {change} |" for label, before, after, change in dimension_rows(result)]
     if result["regressions"]:
-        lines += ["", "**Regressed cases**", "", "| Case | Difficulty | Expected | Was | Now |", "|---|---|---|---|---|"]
-        lines += [f"| `{r['id']}` | {r['difficulty']} | {r['expected']} | {r['was']} | {r['now'] or 'error'} |"
+        lines += ["", "**Regressed cases**", "", "| Case | Difficulty | Expected | Was | Now | Summary score |",
+                  "|---|---|---|---|---|---|"]
+        lines += [f"| `{r['id']}` | {r['difficulty']} | {r['expected']} | {r['was']} | {r['now'] or 'error'} | "
+                  f"{r['summary_score_now'] if r['summary_score_now'] is not None else '—'} |"
                   for r in result["regressions"]]
     if drift["status"] == "DRIFT":
         lines += ["", f"📉 **Slow drift:** {drift['message']}"]
     if status == "FAIL":
-        lines += ["", "This change is blocked until the regressions are fixed or the allowed limit is raised on purpose."]
+        lines += ["", "This change is blocked: the drop is past the critical threshold. Fix the prompt, "
+                  "or raise CRITICAL_DELTA on purpose and say why in this pull request."]
     if report_url:
         lines += ["", f"📄 Full HTML report: [workflow run]({report_url}) (download the `regression-report` artifact)"]
     return "\n".join(lines) + "\n"
@@ -93,8 +103,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--candidate", required=True, help="Prompt file to test, e.g. prompts/v4.yaml")
     parser.add_argument("--baseline", default=os.getenv("BASELINE_PROMPT"),
                         help="Baseline prompt version (e.g. v3) or results file (env: BASELINE_PROMPT)")
-    parser.add_argument("--max-regressions", type=int, default=int(os.getenv("MAX_REGRESSIONS", "0")),
-                        help="Regressions to tolerate (default 0, env: MAX_REGRESSIONS)")
+    add_threshold_args(parser)
     parser.add_argument("--skip-eval", action="store_true", help="Use the candidate's latest results instead of a new run")
     parser.add_argument("--threshold", type=float, default=float(os.getenv("DRIFT_THRESHOLD", THRESHOLD)),
                         help=f"Drift threshold %% (default {THRESHOLD}, env: DRIFT_THRESHOLD)")
@@ -131,8 +140,10 @@ def main(argv: list[str] | None = None) -> int:
     baseline_path = resolve_baseline(args.baseline, candidate_path)
     baseline = json.loads(baseline_path.read_text())
     print(f"\n[2/4] Comparing with baseline {baseline_path}")
-    page, result, status = build_report(baseline, candidate, args.max_regressions)
-    print(f"      {status}: {headline(result)}")
+    page, result, status = build_report(baseline, candidate, **thresholds(args))
+    print(f"      {status} (severity: {result['severity']}): {headline(result)}")
+    for reason in result["reasons"]:
+        print(f"        - {reason}")
     report_path = save_report(page, result)
     print(f"[3/4] Report saved to {report_path}")
 
