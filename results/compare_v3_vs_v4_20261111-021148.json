@@ -1,0 +1,89 @@
+{
+  "compared_at": "2026-11-11T02:11:48",
+  "baseline": {
+    "prompt_version": "v3",
+    "run_at": "2026-11-10T20:24:25",
+    "dataset_version": "1.0",
+    "model": "openai/gpt-oss-120b",
+    "judge_model": null
+  },
+  "candidate": {
+    "prompt_version": "v4",
+    "run_at": "2026-11-11T01:52:18",
+    "dataset_version": "1.0",
+    "model": "openai/gpt-oss-120b",
+    "judge_model": "openai/gpt-oss-20b"
+  },
+  "same_dataset": true,
+  "shared_cases": 60,
+  "only_in_baseline": [],
+  "only_in_candidate": [],
+  "baseline_passed": 59,
+  "candidate_passed": 60,
+  "accuracy_change_pts": 1.7,
+  "regressions": [],
+  "fixes": [
+    {
+      "id": "case-076",
+      "difficulty": "medium",
+      "expected": "account",
+      "was": "technical",
+      "now": "account",
+      "error": null,
+      "summary_score_was": null,
+      "summary_score_now": 5
+    }
+  ],
+  "still_failing": [],
+  "candidate_errors": 0,
+  "by_category": {
+    "billing": {
+      "total": 15,
+      "baseline": 15,
+      "candidate": 15,
+      "change_pts": 0.0
+    },
+    "technical": {
+      "total": 15,
+      "baseline": 15,
+      "candidate": 15,
+      "change_pts": 0.0
+    },
+    "account": {
+      "total": 15,
+      "baseline": 14,
+      "candidate": 15,
+      "change_pts": 6.7
+    },
+    "general": {
+      "total": 15,
+      "baseline": 15,
+      "candidate": 15,
+      "change_pts": 0.0
+    }
+  },
+  "dimensions": {
+    "baseline": {
+      "summary_relevance": null,
+      "summaries_scored": 0,
+      "latency_mean_ms": null,
+      "latency_p95_ms": null,
+      "tokens_total": null
+    },
+    "candidate": {
+      "summary_relevance": 4.8,
+      "summaries_scored": 60,
+      "latency_mean_ms": 546,
+      "latency_p95_ms": 847,
+      "tokens_total": 84792
+    }
+  },
+  "thresholds": {
+    "warning_delta": 3.0,
+    "critical_delta": 8.0,
+    "max_regressions": null
+  },
+  "severity": "ok",
+  "status": "PASS",
+  "reasons": []
+}

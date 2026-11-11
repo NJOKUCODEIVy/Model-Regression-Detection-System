@@ -14,20 +14,17 @@ from datetime import datetime
 from html import escape
 from pathlib import Path
 
-from src.evals.compare import RESULTS_DIR, compare, find_results, pct
+from src.evals.compare import (RESULTS_DIR, add_threshold_args, compare, dimension_rows, find_results, fmt,
+                               pct, thresholds)
 
 GOLDEN_PATH = Path("data/golden.json")
 REPORTS_DIR = Path("reports")
 TREND_RUNS = 10  # how many recent runs the trend chart shows
 
 
-def run_status(result: dict, candidate: dict) -> str:
-    """FAIL = regression beyond the allowed limit, WARN = needs a look, PASS = all clear."""
-    if result["verdict"] == "REGRESSION":
-        return "FAIL"
-    if result["regressions"] or any(case["error"] for case in candidate["cases"]):
-        return "WARN"
-    return "PASS"
+def run_status(result: dict, candidate: dict | None = None) -> str:
+    """FAIL = critical, WARN = needs a look, PASS = all clear. compare.py decides; see its thresholds."""
+    return result["status"]
 
 
 def load_history(limit: int = TREND_RUNS) -> list[dict]:
@@ -74,11 +71,13 @@ def trend_chart_svg(runs: list[dict], highlight_run_at: str) -> str:
     return "".join(parts)
 
 
-def output_cell(category: str | None, summary: str | None, error: str | None, passed: bool) -> str:
-    if error:
-        return f"<span class='tag fail'>error</span><div class='muted'>{escape(error[:160])}</div>"
-    tag = "pass" if passed else "fail"
-    return f"<span class='tag {tag}'>{escape(str(category))}</span><div>{escape(summary or '')}</div>"
+def output_cell(row: dict) -> str:
+    if row.get("error"):
+        return f"<span class='tag fail'>error</span><div class='muted'>{escape(row['error'][:160])}</div>"
+    tag = "pass" if row["passed"] else "fail"
+    score = row.get("judge_score")
+    badge = f" <span class='tag score' title='Summary relevance (LLM judge)'>{score}/5</span>" if score else ""
+    return f"<span class='tag {tag}'>{escape(str(row['predicted']))}</span>{badge}<div>{escape(row.get('summary') or '')}</div>"
 
 
 def case_table(entries: list[dict], base: dict, cand: dict, inputs: dict) -> str:
@@ -92,8 +91,8 @@ def case_table(entries: list[dict], base: dict, cand: dict, inputs: dict) -> str
             f"<td><strong>{escape(entry['id'])}</strong><div class='muted'>{escape(entry['difficulty'])}</div></td>"
             f"<td class='email'>{escape(inputs.get(entry['id'], ''))}</td>"
             f"<td><span class='tag'>{escape(c['expected'])}</span><div>{escape(c.get('expected_summary') or '')}</div></td>"
-            f"<td>{output_cell(b['predicted'], b.get('summary'), b['error'], b['passed'])}</td>"
-            f"<td>{output_cell(c['predicted'], c.get('summary'), c['error'], c['passed'])}</td>"
+            f"<td>{output_cell(b)}</td>"
+            f"<td>{output_cell(c)}</td>"
             "</tr>"
         )
     return ("<div class='scroll'><table><thead><tr><th>Case</th><th>Email</th><th>Expected</th>"
@@ -120,9 +119,23 @@ def breakdown_table(base: dict, cand: dict, shared: list[str], key: str, order: 
             "</thead><tbody>" + "".join(rows) + "</tbody></table>")
 
 
-def build_report(baseline: dict, candidate: dict, max_regressions: int = 0) -> tuple[str, dict, str]:
-    result = compare(baseline, candidate, max_regressions)
-    status = run_status(result, candidate)
+def weak_summaries_table(cand: dict, shared: list[str], inputs: dict) -> str:
+    weak = [cand[cid] for cid in shared if cand[cid].get("judge_score") is not None and cand[cid]["judge_score"] <= 2]
+    if not weak:
+        scored = any(cand[cid].get("judge_score") is not None for cid in shared)
+        return "<p class='muted'>None." + ("" if scored else " (Summaries were not scored in this run.)") + "</p>"
+    rows = "".join(
+        f"<tr><td><strong>{escape(r['id'])}</strong></td><td class='email'>{escape(inputs.get(r['id'], ''))}</td>"
+        f"<td>{escape(r.get('summary') or '')}</td><td><span class='tag fail'>{r['judge_score']}/5</span>"
+        f"<div class='muted'>{escape(r.get('judge_reason') or '')}</div></td></tr>" for r in weak)
+    return ("<div class='scroll'><table><thead><tr><th>Case</th><th>Email</th><th>Candidate summary</th>"
+            "<th>Judge</th></tr></thead><tbody>" + rows + "</tbody></table></div>")
+
+
+def build_report(baseline: dict, candidate: dict, **threshold_settings) -> tuple[str, dict, str]:
+    """threshold_settings: warning_delta, critical_delta, max_regressions (see compare.py)."""
+    result = compare(baseline, candidate, **threshold_settings)
+    status = run_status(result)
     base = {c["id"]: c for c in baseline["cases"]}
     cand = {c["id"]: c for c in candidate["cases"]}
     shared = [cid for cid in base if cid in cand]
@@ -138,6 +151,19 @@ def build_report(baseline: dict, candidate: dict, max_regressions: int = 0) -> t
         f"<tr><td>{label}</td><td>{escape(str(baseline[key]))}</td><td>{escape(str(candidate[key]))}</td></tr>"
         for label, key in [("Prompt version", "prompt_version"), ("Model", "model"),
                            ("Dataset version", "dataset_version"), ("Run at", "run_at")])
+    meta_rows += (f"<tr><td>Summary judge</td><td>{escape(baseline.get('judge_model') or '—')}</td>"
+                  f"<td>{escape(candidate.get('judge_model') or '—')}</td></tr>")
+
+    t = result["thresholds"]
+    limit = f" · hard limit {t['max_regressions']} regressions" if t["max_regressions"] is not None else ""
+    reasons = "".join(f"<li>{escape(r)}</li>" for r in result["reasons"]) or "<li>No regressions.</li>"
+    severity_panel = (f"<section class='severity {status.lower()}'><p><strong>Severity: {result['severity']}</strong>"
+                      f" <span class='muted'>· warning above {t['warning_delta']:g} pts · critical above "
+                      f"{t['critical_delta']:g} pts{limit}</span></p><ul>{reasons}</ul></section>")
+
+    dims_b, dims_c = result["dimensions"]["baseline"], result["dimensions"]["candidate"]
+    dim_rows = "".join(f"<tr><td>{label}</td><td>{before}</td><td>{after}</td><td>{change}</td></tr>"
+                       for label, before, after, change in dimension_rows(result))
 
     body = f"""
 <header>
@@ -148,6 +174,7 @@ def build_report(baseline: dict, candidate: dict, max_regressions: int = 0) -> t
   </div>
   <span class="status {status.lower()}">{status}</span>
 </header>
+{severity_panel}
 {dataset_note}
 
 <section class="cards">
@@ -159,11 +186,22 @@ def build_report(baseline: dict, candidate: dict, max_regressions: int = 0) -> t
     <p class="muted">failed before, pass now</p></div>
   <div class="card"><p class="label">Still failing</p><p class="big">{len(result['still_failing'])}</p>
     <p class="muted">failed in both runs</p></div>
+  <div class="card"><p class="label">Summary relevance</p><p class="big">{fmt(dims_c['summary_relevance'], '', 2)}<span class="unit">/5</span></p>
+    <p class="muted">was {fmt(dims_b['summary_relevance'], '', 2)} &middot; LLM judge, {dims_c['summaries_scored']} scored</p></div>
+  <div class="card"><p class="label">Latency</p><p class="big">{fmt(dims_c['latency_mean_ms'])}<span class="unit"> ms</span></p>
+    <p class="muted">mean &middot; p95 {fmt(dims_c['latency_p95_ms'], ' ms')} &middot; was {fmt(dims_b['latency_mean_ms'], ' ms')}</p></div>
+  <div class="card"><p class="label">Tokens</p><p class="big">{fmt(dims_c['tokens_total'])}</p>
+    <p class="muted">classifier + judge &middot; was {fmt(dims_b['tokens_total'])}</p></div>
 </section>
 
 <section>
   <h2>Run details</h2>
   <table class="compact"><thead><tr><th></th><th>Baseline</th><th>Candidate</th></tr></thead><tbody>{meta_rows}</tbody></table>
+</section>
+
+<section>
+  <h2>All dimensions</h2>
+  <table class="compact"><thead><tr><th></th><th>Baseline</th><th>Candidate</th><th>Change</th></tr></thead><tbody>{dim_rows}</tbody></table>
 </section>
 
 <section class="two-col">
@@ -184,6 +222,11 @@ def build_report(baseline: dict, candidate: dict, max_regressions: int = 0) -> t
 <section>
   <h2>Still failing ({len(result['still_failing'])})</h2>
   {case_table(result['still_failing'], base, cand, inputs)}
+</section>
+
+<section>
+  <h2>Weak summaries in the candidate (judge score 1–2)</h2>
+  {weak_summaries_table(cand, shared, inputs)}
 </section>
 
 <section>
@@ -217,6 +260,11 @@ h1 { margin:4px 0; font-size:28px; } h2 { font-size:18px; margin:32px 0 12px; }
 .status { font-weight:700; padding:8px 16px; border-radius:999px; font-size:16px; }
 .status.pass { color:var(--pass); background:var(--pass-bg); } .status.warn { color:var(--warn); background:var(--warn-bg); }
 .status.fail { color:var(--fail); background:var(--fail-bg); }
+.severity { border:1px solid var(--border); border-left-width:4px; border-radius:8px; padding:4px 16px; margin-bottom:20px; background:var(--surface); }
+.severity.pass { border-left-color:var(--pass); } .severity.warn { border-left-color:var(--warn); } .severity.fail { border-left-color:var(--fail); }
+.severity ul { margin:4px 0 10px; padding-left:20px; }
+.unit { font-size:16px; font-weight:400; color:var(--muted); }
+.tag.score { color:var(--accent); background:transparent; border:1px solid var(--border); }
 .warning { background:var(--warn-bg); color:var(--warn); padding:10px 14px; border-radius:8px; }
 .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; }
 .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; }
@@ -253,14 +301,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build an HTML diff report for two eval runs.")
     parser.add_argument("--baseline", required=True, help="Prompt version (e.g. v3) or path to a results file")
     parser.add_argument("--candidate", required=True, help="Prompt version (e.g. v4) or path to a results file")
-    parser.add_argument("--max-regressions", type=int, default=0, help="Regressions to tolerate (default 0)")
+    add_threshold_args(parser)
     args = parser.parse_args()
 
     baseline = json.loads(find_results(args.baseline).read_text())
     candidate = json.loads(find_results(args.candidate).read_text())
-    page, result, status = build_report(baseline, candidate, args.max_regressions)
+    page, result, status = build_report(baseline, candidate, **thresholds(args))
     path = save_report(page, result)
-    print(f"Status: {status}  |  {len(result['regressions'])} regression(s), {len(result['fixes'])} fix(es), "
-          f"accuracy {result['accuracy_change_pts']:+.1f} pts")
+    print(f"Status: {status} (severity: {result['severity']})  |  {len(result['regressions'])} regression(s), "
+          f"{len(result['fixes'])} fix(es), pass rate {result['accuracy_change_pts']:+.1f} pts")
     print(f"Report saved to {path}")
     print(f"Open it with:  open {path}")

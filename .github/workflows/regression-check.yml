@@ -31,8 +31,11 @@ jobs:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       # Settings: change them under Settings → Secrets and variables → Actions → Variables
       BASELINE_PROMPT: ${{ vars.BASELINE_PROMPT || 'v4' }}
-      MAX_REGRESSIONS: ${{ vars.MAX_REGRESSIONS || '0' }}
+      WARNING_DELTA: ${{ vars.WARNING_DELTA || '3' }}    # warn when the pass rate drops more than this (points)
+      CRITICAL_DELTA: ${{ vars.CRITICAL_DELTA || '8' }}  # fail and block the merge above this
+      MAX_REGRESSIONS: ${{ vars.MAX_REGRESSIONS }}       # optional hard limit; empty means no limit
       DRIFT_THRESHOLD: ${{ vars.DRIFT_THRESHOLD || '95' }}
+      JUDGE_MODEL: ${{ vars.JUDGE_MODEL || 'openai/gpt-oss-20b' }}
       REPORT_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     steps:
